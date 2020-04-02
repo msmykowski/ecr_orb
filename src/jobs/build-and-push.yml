@@ -1,0 +1,45 @@
+description: |
+  A wrapper around the aws-ecr orb. build-and-push-image command, providing standard defaults for
+    our services. See https://github.com/CircleCI-Public/aws-ecr-orb for more.
+executor: <<parameters.executor>>
+parameters:
+  executor:
+    default: aws-ecr/default
+    description: executor to use for this job
+    type: executor
+  extra-build-args:
+    default: "--build-arg HEX_API_KEY=$HEX_API_KEY"
+    description: |
+      Extra flags to pass to docker build. For examples, see https://docs.docker.com/engine/reference/commandline/build.
+        The HEX_API_KEY is passed in by default, using the HEX_API_KEY environment variable.
+    type: string
+  tag:
+    default: "latest,$CIRCLE_BRANCH,$CIRCLE_SHA1,$CIRCLE_BUILD_NUM"
+    description: |
+      A comma-separated string containing docker image tags to build and push.
+        By default images are tagged with the branch, sha, latest and circleci build number.
+    type: string
+  docker-login:
+    default: false
+    description: A boolean indicating whether access to the private docker registry is required to build the image.
+    type: boolean
+  docker-registry-url:
+    default: DOCKER_REGISTRY
+    description: Environment variable storing the account url for the private docker registry.
+    type: env_var_name
+  docker-password:
+    default: DOCKER_PASSWORD
+    description: Environment variable storing the password to authenticate with the private registry.
+    type: env_var_name
+  docker-user:
+    default: DOCKER_USER
+    description: Environment variable storing the user to authenticate with the private registry.
+    type: env_var_name
+steps:
+  - build-and-push:
+      docker-login: <<parameters.docker-login>>
+      docker-registry-url: <<parameters.docker-registry-url>>
+      docker-password: <<parameters.docker-password>>
+      docker-user: <<parameters.docker-user>>
+      extra-build-args: <<parameters.extra-build-args>>
+      tag: <<parameters.tag>>
